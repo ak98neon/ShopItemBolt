@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/google/uuid"
 	"log"
-	"os/exec"
 )
 
 const DbPath = "item.db"
@@ -23,11 +23,8 @@ type Item struct {
 }
 
 func (i *Item) GenerateUniqueId() {
-	out, err := exec.Command("uuidgen").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	i.ID = string(out)
+	newID := uuid.New()
+	i.ID = newID.String()
 }
 
 func Open() {
