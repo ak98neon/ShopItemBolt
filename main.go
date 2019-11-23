@@ -15,21 +15,12 @@ func main() {
 	defer db.Close()
 
 	r := mux.NewRouter()
-	http.Handle("/", setupCors(r))
 	r.HandleFunc("/items", GetAllItems).Methods("GET")
 	r.HandleFunc("/items/{id}", GetItemById).Methods("GET")
 	r.HandleFunc("/items", SaveItem).Methods("POST")
 	r.HandleFunc("/items/{id}", UpdateItem).Methods("PUT")
 	r.HandleFunc("/items/{id}", DeleteItem).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(DefaultPort, r))
-}
-
-func setupCors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		next.ServeHTTP(w, r)
-	})
 }
 
 func GetItemById(w http.ResponseWriter, r *http.Request) {
