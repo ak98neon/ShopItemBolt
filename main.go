@@ -8,8 +8,7 @@ import (
 	"net/http"
 )
 
-const DEFAULT_PORT = ":8080"
-const ItemBucket = "item"
+const DefaultPort = ":8080"
 
 func main() {
 	db.Open()
@@ -17,13 +16,26 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/items", GetAllItems).Methods("GET")
+	r.HandleFunc("/items/{id}", GetItemById).Methods("GET")
 	r.HandleFunc("/items", SaveItem).Methods("POST")
-	log.Fatal(http.ListenAndServe(DEFAULT_PORT, r))
+	r.HandleFunc("/items/{id}", UpdateItem).Methods("PUT")
+	r.HandleFunc("/items/{id}", DeleteItem).Methods("DELETE")
+	log.Fatal(http.ListenAndServe(DefaultPort, r))
+}
+
+func GetItemById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	item, err := db.GetItem(params["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = json.NewEncoder(w).Encode(item)
 }
 
 func GetAllItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	items := db.List(ItemBucket)
+	items := db.List(db.ItemBucket)
 	_ = json.NewEncoder(w).Encode(items)
 }
 
@@ -37,9 +49,20 @@ func SaveItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
+	var item db.Item
+	_ = json.NewDecoder(r.Body).Decode(&item)
+	_ = item.Save()
+	_ = json.NewEncoder(w).Encode(item)
 }
 
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id := params["id"]
+	if id == "" {
+		log.Fatal("Id is empty!")
+	}
+	_ = db.Delete(id)
+	_ = json.NewEncoder(w).Encode("Item was deleted!")
 }

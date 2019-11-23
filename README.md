@@ -14,6 +14,12 @@ sudo GOOS=<os> GOARCH=<architecture_type> go build -o <nameOfApp>.<extenstion> <
 ```go
 [GET] http://localhost:8080/items
 ```
+
+####Get item by id
+```go
+[GET] http://localhost:8080/{id}
+```
+
 ####Create new item
 ```go
 [POST] http://localhost:8080/items

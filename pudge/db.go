@@ -9,6 +9,7 @@ import (
 )
 
 const DbPath = "item.db"
+const ItemBucket = "item"
 
 var db *bolt.DB
 
@@ -51,17 +52,48 @@ func Close() {
 	_ = db.Close()
 }
 
+func GetItem(id string) (*Item, error) {
+	var i *Item
+	err := db.View(func(tx *bolt.Tx) error {
+		var err error
+		b := tx.Bucket([]byte(ItemBucket))
+		k := []byte(id)
+		i, err = decode(b.Get(k))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("Could not get Item ID %s", id)
+		return nil, err
+	}
+	return i, nil
+}
+
 func (i Item) Save() error {
 	err := db.Update(func(tx *bolt.Tx) error {
-		people, err := tx.CreateBucketIfNotExists([]byte("item"))
+		item, err := tx.CreateBucketIfNotExists([]byte(ItemBucket))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
 		enc, err := i.encode()
 		if err != nil {
-			return fmt.Errorf("could not encode Person %s: %s", i.ID, err)
+			return fmt.Errorf("could not encode Item %s: %s", i.ID, err)
 		}
-		err = people.Put([]byte(i.ID), enc)
+		err = item.Put([]byte(i.ID), enc)
+		return err
+	})
+	return err
+}
+
+func Delete(id string) error {
+	err := db.Update(func(tx *bolt.Tx) error {
+		item, err := tx.CreateBucketIfNotExists([]byte(ItemBucket))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		err = item.Delete([]byte(id))
 		return err
 	})
 	return err
