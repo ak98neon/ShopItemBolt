@@ -4,7 +4,9 @@
 
 ###For start server
 ```shell script
-Run appleShop file or in command line execute go run main.go
+1. Run appleShop file or in command line execute go run main.go
+2. Build startup file for your system, for example windows:
+sudo GOOS=<os> GOARCH=<architecture_type> go build -o <nameOfApp>.<extenstion> <projectEntryPointFile>.go
 ```
 
 ###Rest Endpoints
