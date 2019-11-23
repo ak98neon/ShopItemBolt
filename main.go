@@ -24,6 +24,8 @@ func main() {
 }
 
 func GetItemById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	item, err := db.GetItem(params["id"])
@@ -34,12 +36,16 @@ func GetItemById(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllItems(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	items := db.List(db.ItemBucket)
 	_ = json.NewEncoder(w).Encode(items)
 }
 
 func SaveItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
@@ -49,6 +55,8 @@ func SaveItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
@@ -57,6 +65,8 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id := params["id"]
