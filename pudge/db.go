@@ -24,7 +24,12 @@ type Item struct {
 
 func (i *Item) GenerateUniqueId() {
 	newID := uuid.New()
-	i.ID = newID.String()
+	item, _ := GetItem(newID.String())
+	if item == nil {
+		i.ID = newID.String()
+	} else {
+		i.GenerateUniqueId()
+	}
 }
 
 func Open() {

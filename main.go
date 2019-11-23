@@ -60,6 +60,11 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
+
+	params := mux.Vars(r)
+	id := params["id"]
+	item.ID = id
+
 	_ = item.Save()
 	_ = json.NewEncoder(w).Encode(item)
 }

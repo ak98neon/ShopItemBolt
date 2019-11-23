@@ -56,10 +56,12 @@ body:
 ###Generate unique id for any entity
 ```go
 func (i *Item) GenerateUniqueId() {
-	out, err := exec.Command("uuidgen").Output()
-	if err != nil {
-		log.Fatal(err)
+	newID := uuid.New()
+	item, _ := GetItem(newID.String())
+	if item == nil {
+		i.ID = newID.String()
+	} else {
+		i.GenerateUniqueId()
 	}
-	i.ID = string(out)
 }
 ```
