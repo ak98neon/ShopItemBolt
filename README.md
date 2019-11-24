@@ -16,6 +16,12 @@ sudo GOOS=windows GOARCH=386 go build -o appleShop.exe appleShop/main.go
 [GET] http://localhost:8080/items
 ```
 
+####Get items with by pagination request
+```go
+[GET] localhost:8080/items?page=2&size=5 
+-> page it's next page, size it's size items on request page
+```
+
 ####Get item by id
 ```go
 [GET] http://localhost:8080/{id}
