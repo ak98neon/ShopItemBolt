@@ -3,6 +3,7 @@ package main
 import (
 	db "akudria/appleShop/pudge"
 	"encoding/json"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -21,12 +22,12 @@ func main() {
 	r.HandleFunc("/items", SaveItem).Methods("POST")
 	r.HandleFunc("/items/{id}", UpdateItem).Methods("PUT")
 	r.HandleFunc("/items/{id}", DeleteItem).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(DefaultPort, r))
+
+	corsObj := handlers.AllowedOrigins([]string{"*"})
+	log.Fatal(http.ListenAndServe(DefaultPort, handlers.CORS(corsObj)(r)))
 }
 
 func GetItemById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	item, err := db.GetItem(params["id"])
@@ -37,8 +38,6 @@ func GetItemById(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllItems(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 
 	params := r.URL.Query()
@@ -67,8 +66,6 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func SaveItem(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
@@ -78,8 +75,6 @@ func SaveItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
@@ -93,8 +88,6 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id := params["id"]
