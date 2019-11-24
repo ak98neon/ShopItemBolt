@@ -1,6 +1,8 @@
 package main
 
 import (
+	"akudria/appleShop/db"
+	"akudria/appleShop/pagination"
 	"encoding/json"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -12,8 +14,8 @@ import (
 const DefaultPort = ":8080"
 
 func main() {
-	Open()
-	defer Close()
+	db.Open()
+	defer db.Close()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/items", GetAllItems).Methods("GET")
@@ -29,7 +31,7 @@ func main() {
 func GetItemById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	item, err := GetItem(params["id"])
+	item, err := db.GetItem(params["id"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,9 +45,9 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 	size, errSize := strconv.Atoi(params.Get("size"))
 	page, errPage := strconv.Atoi(params.Get("page"))
 
-	items := List(ItemBucket)
+	items := db.List(db.ItemBucket)
 	if errSize != nil || errPage != nil {
-		pageRequest := PageRequest{
+		pageRequest := pagination.PageRequest{
 			Items:       items,
 			TotalCount:  len(items),
 			CountOfPage: len(items),
@@ -66,7 +68,7 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 		}
 
 		paginationItems := items[start:end]
-		pageRequest := PageRequest{
+		pageRequest := pagination.PageRequest{
 			Items:       paginationItems,
 			TotalCount:  len(paginationItems),
 			CountOfPage: size,
@@ -78,7 +80,7 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 
 func SaveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var item Item
+	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
 	item.GenerateUniqueId()
 	_ = item.Save()
@@ -87,7 +89,7 @@ func SaveItem(w http.ResponseWriter, r *http.Request) {
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var item Item
+	var item db.Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
 
 	params := mux.Vars(r)
@@ -105,6 +107,6 @@ func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	if id == "" {
 		log.Fatal("Id is empty!")
 	}
-	_ = Delete(id)
+	_ = db.Delete(id)
 	_ = json.NewEncoder(w).Encode("Item was deleted!")
 }
