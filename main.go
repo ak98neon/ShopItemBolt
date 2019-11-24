@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 const DefaultPort = ":8080"
@@ -39,8 +40,30 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
+
+	params := r.URL.Query()
+	size, errSize := strconv.Atoi(params.Get("size"))
+	page, errPage := strconv.Atoi(params.Get("page"))
+
 	items := db.List(db.ItemBucket)
-	_ = json.NewEncoder(w).Encode(items)
+	if errSize != nil || errPage != nil {
+		_ = json.NewEncoder(w).Encode(items)
+	} else {
+		log.Println("Request size: ", size, " and request page: ", page)
+		start := (page - 1) * size
+		end := start + size
+
+		if start < 0 || start > len(items) {
+			http.Error(w, "Bad request", 400)
+		}
+
+		if end > len(items) {
+			end = len(items) - 1
+		}
+
+		paginationItems := items[start:end]
+		_ = json.NewEncoder(w).Encode(paginationItems)
+	}
 }
 
 func SaveItem(w http.ResponseWriter, r *http.Request) {
