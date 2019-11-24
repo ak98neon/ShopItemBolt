@@ -1,7 +1,6 @@
 package main
 
 import (
-	db "akudria/appleShop/pudge"
 	"encoding/json"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -13,8 +12,8 @@ import (
 const DefaultPort = ":8080"
 
 func main() {
-	db.Open()
-	defer db.Close()
+	Open()
+	defer Close()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/items", GetAllItems).Methods("GET")
@@ -30,7 +29,7 @@ func main() {
 func GetItemById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	item, err := db.GetItem(params["id"])
+	item, err := GetItem(params["id"])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,9 +43,15 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 	size, errSize := strconv.Atoi(params.Get("size"))
 	page, errPage := strconv.Atoi(params.Get("page"))
 
-	items := db.List(db.ItemBucket)
+	items := List(ItemBucket)
 	if errSize != nil || errPage != nil {
-		_ = json.NewEncoder(w).Encode(items)
+		pageRequest := PageRequest{
+			Items:       items,
+			TotalCount:  len(items),
+			CountOfPage: len(items),
+			CurrentPage: 1,
+		}
+		_ = json.NewEncoder(w).Encode(pageRequest)
 	} else {
 		log.Println("Request size: ", size, " and request page: ", page)
 		start := (page - 1) * size
@@ -61,13 +66,19 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 		}
 
 		paginationItems := items[start:end]
-		_ = json.NewEncoder(w).Encode(paginationItems)
+		pageRequest := PageRequest{
+			Items:       paginationItems,
+			TotalCount:  len(paginationItems),
+			CountOfPage: size,
+			CurrentPage: page,
+		}
+		_ = json.NewEncoder(w).Encode(pageRequest)
 	}
 }
 
 func SaveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var item db.Item
+	var item Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
 	item.GenerateUniqueId()
 	_ = item.Save()
@@ -76,7 +87,7 @@ func SaveItem(w http.ResponseWriter, r *http.Request) {
 
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var item db.Item
+	var item Item
 	_ = json.NewDecoder(r.Body).Decode(&item)
 
 	params := mux.Vars(r)
@@ -94,6 +105,6 @@ func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	if id == "" {
 		log.Fatal("Id is empty!")
 	}
-	_ = db.Delete(id)
+	_ = Delete(id)
 	_ = json.NewEncoder(w).Encode("Item was deleted!")
 }

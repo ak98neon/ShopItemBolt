@@ -1,4 +1,4 @@
-package pudge
+package main
 
 import (
 	"encoding/json"
