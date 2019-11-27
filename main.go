@@ -70,7 +70,7 @@ func GetAllItems(w http.ResponseWriter, r *http.Request) {
 		paginationItems := items[start:end]
 		pageRequest := pagination.PageRequest{
 			Items:       paginationItems,
-			TotalCount:  len(paginationItems),
+			TotalCount:  len(items),
 			CountOfPage: size,
 			CurrentPage: page,
 		}
